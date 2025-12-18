@@ -14,7 +14,11 @@ from homeassistant.components.climate.const import (
     FAN_OFF,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfTemperature, ATTR_TEMPERATURE
+from homeassistant.const import (
+    UnitOfTemperature,
+    ATTR_TEMPERATURE,
+    PRECISION_TENTHS,
+)
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -88,6 +92,7 @@ class DaikinOneThermostat(DaikinOneEntity[DaikinThermostat], ClimateEntity):
         self._attr_translation_key = "daikinone_thermostat"
         self._attr_unique_id = f"{self._device.id}-climate"
         self._attr_temperature_unit = UnitOfTemperature.CELSIUS
+        self._attr_precision = PRECISION_TENTHS
         self._attr_supported_features = (
             ClimateEntityFeature.TURN_ON
             | ClimateEntityFeature.TURN_OFF
