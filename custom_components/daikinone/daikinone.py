@@ -375,7 +375,8 @@ class DaikinOne:
         equipment: dict[str, DaikinEquipment] = {}
 
         # air handler
-        if payload.data.get("ctAHUnitType", 255) < 255:
+        if (payload.data.get("ctAHUnitType", 255) < 255 and
+            payload.data.get("ctAHFanRequestedDemand", 255) < 255):
             model = payload.data["ctAHModelNoCharacter1_15"].strip()
             serial = payload.data["ctAHSerialNoCharacter1_15"].strip()
             eid = f"{model}-{serial}"
@@ -402,7 +403,8 @@ class DaikinOne:
             )
 
         # furnace
-        if payload.data.get("ctIFCUnitType", 255) < 255:
+        if (payload.data.get("ctIFCUnitType", 255) < 255 and
+            payload.data.get("ctIFCFanRequestedDemandPercent", 255) < 255):
             model = payload.data["ctIFCModelNoCharacter1_15"].strip()
             serial = payload.data["ctIFCSerialNoCharacter1_15"].strip()
             eid = f"{model}-{serial}"
@@ -429,7 +431,9 @@ class DaikinOne:
             )
 
         # outdoor unit
-        if payload.data.get("ctOutdoorUnitType", 255) < 255:
+        if (payload.data.get("ctOutdoorUnitType", 255) < 255 and
+            payload.data.get("ctOutdoorHeatRequestedDemand", 255) < 255 and
+            payload.data.get("ctOutdoorCoolRequestedDemand", 255) < 255):
             model = payload.data["ctOutdoorModelNoCharacter1_15"].strip()
             serial = payload.data["ctOutdoorSerialNoCharacter1_15"].strip()
             eid = f"{model}-{serial}"
@@ -479,7 +483,8 @@ class DaikinOne:
             )
 
         # eev coil
-        if payload.data.get("ctCoilUnitType", 255) < 255:
+        if (payload.data.get("ctCoilUnitType", 255) < 255 and
+            payload.data.get("ctEEVCoilPressureSensor", 65535) < 65535):
             model = "EEV Coil"
             serial = payload.data["ctCoilSerialNoCharacter1_15"].strip()
             eid = f"eevcoil-{serial}"
