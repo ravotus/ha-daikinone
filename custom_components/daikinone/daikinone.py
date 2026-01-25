@@ -201,6 +201,7 @@ class DaikinThermostat(DaikinDevice):
     set_point_cool: Temperature
     set_point_cool_min: Temperature
     set_point_cool_max: Temperature
+    set_point_humidity: int
     outdoor_temperature: Temperature
     outdoor_humidity: int
     air_quality_outdoor: DaikinOneAirQualitySensorOutdoor | None
@@ -284,6 +285,19 @@ class DaikinOne:
             body=payload,
         )
 
+    async def set_thermostat_humidity_set_point(
+        self,
+        thermostat_id: str,
+        humidity: int | None = None,
+    ) -> None:
+        """Set thermostat humidity point"""
+
+        await self.__req(
+            url=f"{DAIKIN_API_URL_DEVICE_DATA}/{thermostat_id}",
+            method="PUT",
+            body={"humSP": humidity},
+        )
+
     async def set_thermostat_fan_mode(self, thermostat_id: str, fan_mode: DaikinThermostatFanMode) -> None:
         """Set thermostat fan mode"""
         await self.__req(
@@ -338,6 +352,7 @@ class DaikinOne:
             set_point_cool=Temperature.from_celsius(payload.data["cspActive"]),
             set_point_cool_min=Temperature.from_celsius(payload.data["EquipProtocolMinCoolSetpoint"]),
             set_point_cool_max=Temperature.from_celsius(payload.data["EquipProtocolMaxCoolSetpoint"]),
+            set_point_humidity=payload.data["humSP"],
             outdoor_temperature=Temperature.from_celsius(payload.data["tempOutdoor"]),
             outdoor_humidity=payload.data["humOutdoor"],
             air_quality_outdoor=self.__map_air_quality_outdoor(payload),

@@ -111,6 +111,8 @@ class DaikinOneThermostat(DaikinOneEntity[DaikinThermostat], ClimateEntity):
         self._attr_target_temperature_low = None
         self._attr_target_temperature_high = None
 
+        self._attr_target_humidity = None
+
         # Set up preset modes based on thermostat capabilities. The preset climate feature will only be
         # enabled if at least one preset is detected as supported.
         self._attr_preset_modes = [DaikinOneThermostatPresetMode.NONE.value]
@@ -119,6 +121,9 @@ class DaikinOneThermostat(DaikinOneEntity[DaikinThermostat], ClimateEntity):
         if DaikinThermostatCapability.EMERGENCY_HEAT in self._device.capabilities:
             self._attr_supported_features |= ClimateEntityFeature.PRESET_MODE
             self._attr_preset_modes += [DaikinOneThermostatPresetMode.EMERGENCY_HEAT.value]
+
+        # TODO: Need some way to detect this
+        self._attr_supported_features |= ClimateEntityFeature.TARGET_HUMIDITY
 
     def get_hvac_modes(self) -> list[HVACMode]:
         modes: list[HVACMode] = []
@@ -269,6 +274,22 @@ class DaikinOneThermostat(DaikinOneEntity[DaikinThermostat], ClimateEntity):
         else:
             raise ValueError("Set temperature called with no temperature values")
 
+    async def async_set_humidity(self, humidity):
+        log.debug("Setting thermostat humidity target=%s ", humidity)
+
+        # update set point optimistically
+        def update(t: DaikinThermostat):
+            t.set_point_humidity = humidity
+
+        await self.update_state_optimistically(
+            operation=lambda: self._data.daikin.set_thermostat_humidity_set_point(
+                self._device.id,
+                humidity=humidity,
+            ),
+            optimistic_update=update,
+            check=lambda t: t.set_point_humidity == humidity,
+        )
+
     async def async_set_fan_mode(self, fan_mode: str) -> None:
         target_fan_mode: DaikinThermostatFanMode
         match fan_mode:
@@ -356,6 +377,12 @@ class DaikinOneThermostat(DaikinOneEntity[DaikinThermostat], ClimateEntity):
             self._device.set_point_heat_max.celsius,
             self._device.set_point_cool_max.celsius,
         )
+
+        self._attr_target_humidity = self._device.set_point_humidity
+
+        # humiditiy bounds TODO
+        self._attr_min_humidity = 20
+        self._attr_max_humidity = 60
 
         # fan settings
         match self._device.fan_mode:
