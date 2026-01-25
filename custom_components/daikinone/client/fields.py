@@ -28,6 +28,7 @@ F_SETPOINT_HEAT_MAX = CelsiusField("EquipProtocolMaxHeatSetpoint")
 F_SETPOINT_COOL = CelsiusField("cspActive")
 F_SETPOINT_COOL_MIN = CelsiusField("EquipProtocolMinCoolSetpoint")
 F_SETPOINT_COOL_MAX = CelsiusField("EquipProtocolMaxCoolSetpoint")
+F_SETPOINT_HUM = PercentField("humSP")
 F_TEMP_OUTDOOR = CelsiusField("tempOutdoor")
 F_HUM_OUTDOOR = PercentField("humOutdoor")
 
