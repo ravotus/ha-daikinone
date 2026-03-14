@@ -353,14 +353,34 @@ class DaikinOne:
             set_point_cool_min=Temperature.from_celsius(payload.data["EquipProtocolMinCoolSetpoint"]),
             set_point_cool_max=Temperature.from_celsius(payload.data["EquipProtocolMaxCoolSetpoint"]),
             set_point_humidity=payload.data["humSP"],
-            outdoor_temperature=Temperature.from_celsius(payload.data["tempOutdoor"]),
-            outdoor_humidity=payload.data["humOutdoor"],
+            outdoor_temperature=Temperature.from_celsius(self.__map_outdoor_temperature(payload)),
+            outdoor_humidity=self.__map_outdoor_humidity(payload),
             air_quality_outdoor=self.__map_air_quality_outdoor(payload),
             air_quality_indoor=self.__map_air_quality_indoor(payload),
             equipment=self.__map_equipment(payload),
         )
 
         return thermostat
+
+    def __map_outdoor_temperature(self, payload: DaikinDeviceDataResponse) -> Temperature | None:
+        outdoor_temp = payload.data.get("tempOutdoor")
+        if outdoor_temp is None:
+            return None
+
+        if outdoor_temp >= 255:
+            return None
+
+        return outdoor_temp
+
+    def __map_outdoor_humidity(self, payload: DaikinDeviceDataResponse) -> int | None:
+        outdoor_hum = payload.data.get("humOutdoor")
+        if outdoor_hum is None:
+            return None
+
+        if outdoor_hum >= 255:
+            return None
+
+        return outdoor_hum
 
     def __map_air_quality_outdoor(self, payload: DaikinDeviceDataResponse) -> DaikinOneAirQualitySensorOutdoor | None:
         if not payload.data["aqOutdoorAvailable"]:
